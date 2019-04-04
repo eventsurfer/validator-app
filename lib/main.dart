@@ -31,8 +31,7 @@ class MyHomePage extends StatelessWidget {
             try {
               List<String> ids = (await BarcodeScanner.scan()).split("\n");
 
-              User u = await signUserIn("admin@example.net", "adminadmin");
-              Ticket t = await validateTicket(u, ids[3], int.parse(ids[2]));
+              Ticket t = await validateTicket(await getUser(), ids[3], int.parse(ids[2]));
               Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => TicketInfoPage(t)));
             } catch (e) {
               if (e is ValidationException) {
@@ -150,11 +149,12 @@ class Settings extends StatelessWidget {
             maxLines: 1,
           ),
           CupertinoButton.filled(
-              child: Text("Login"),
-              onPressed: () async {
-                saveApiKey(this._apiController.text);
-                saveUser(await signUserIn(this._userController.text, this._pswController.text));
-              })
+            child: Text("Login"),
+            onPressed: () async {
+              saveApiKey(this._apiController.text);
+              saveUser(await signUserIn(this._userController.text, this._pswController.text));
+            },
+          )
         ],
       ),
       navigationBar: CupertinoNavigationBar(),
