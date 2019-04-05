@@ -64,8 +64,8 @@ class User {
         'admin': this.admin,
         'enabled': this.enabled,
         'email': this.email,
-        'created_at': this.createdAt,
-        'updated_at': this.updatedAt,
+        'created_at': this.createdAt.toIso8601String(),
+        'updated_at': this.updatedAt.toIso8601String(),
         'role': this.role
       };
 }

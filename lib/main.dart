@@ -104,58 +104,76 @@ class TicketInfoPage extends StatelessWidget {
   }
 }
 
-class Settings extends StatelessWidget {
-  final TextEditingController _apiController = TextEditingController();
-  final TextEditingController _userController = TextEditingController();
-  final TextEditingController _pswController = TextEditingController();
-  // TODO setting the text does not work correctly
+class Settings extends StatefulWidget {
+  @override
+  _SettingsState createState() => _SettingsState();
+}
 
-  Settings() {
+class _SettingsState extends State<Settings> {
+  TextEditingController _apiController = TextEditingController();
+  TextEditingController _userController = TextEditingController();
+  TextEditingController _pswController = TextEditingController();
+
+  _SettingsState() {
     getApiKey().then((String key) {
-      _apiController.text = key;
+      setState(() {
+        _apiController.text = key;
+      });
     });
     getUser().then((User user) {
-      _userController.text = user.email;
+      setState(() {
+        _userController.text = user.email;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      child: ListView(
-        children: <Widget>[
-          CupertinoTextField(
-            controller: this._apiController,
-            placeholder: "API Key",
-            autocorrect: false,
-            maxLines: 1,
-            suffix: CupertinoButton(
-              child: Icon(CupertinoIcons.photo_camera),
-              onPressed: () async {
-                this._apiController.text = await BarcodeScanner.scan();
-              },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+        child: ListView(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: this._apiController,
+              clearButtonMode: OverlayVisibilityMode.editing,
+              placeholder: "API Key",
+              autocorrect: false,
+              maxLines: 1,
+              suffix: CupertinoButton(
+                child: Icon(CupertinoIcons.photo_camera),
+                onPressed: () {
+                  setState(() async {
+                    this._apiController.text = await BarcodeScanner.scan();
+                  });
+                },
+              ),
             ),
-          ),
-          CupertinoTextField(
-            controller: _userController,
-            placeholder: "Username",
-            autocorrect: false,
-            maxLines: 1,
-          ),
-          CupertinoTextField(
-            controller: _pswController,
-            placeholder: "Password",
-            obscureText: true,
-            maxLines: 1,
-          ),
-          CupertinoButton.filled(
-            child: Text("Login"),
-            onPressed: () async {
-              saveApiKey(this._apiController.text);
-              saveUser(await signUserIn(this._userController.text, this._pswController.text));
-            },
-          )
-        ],
+            CupertinoTextField(
+              controller: _userController,
+              clearButtonMode: OverlayVisibilityMode.editing,
+              placeholder: "Username",
+              autocorrect: false,
+              maxLines: 1,
+            ),
+            CupertinoTextField(
+              controller: _pswController,
+              clearButtonMode: OverlayVisibilityMode.editing,
+              placeholder: "Password",
+              obscureText: true,
+              maxLines: 1,
+            ),
+            CupertinoButton.filled(
+              child: Text("Login"),
+              onPressed: () async {
+                saveApiKey(this._apiController.text);
+                saveUser(await signUserIn(this._userController.text, this._pswController.text));
+                Navigator.pop(context);
+                // TODO user feedback
+              },
+            )
+          ],
+        ),
       ),
       navigationBar: CupertinoNavigationBar(),
     );

@@ -15,10 +15,10 @@ Future<String> getApiKey() async {
 }
 
 saveUser(User user) {
-  _storage.write(key: "user", value: user.toJson().toString());
+  _storage.write(key: "user", value: json.encode(user.toJson()));
 }
 
 Future<User> getUser() async {
-  String jsonUser =  await _storage.read(key: "user");
+  String jsonUser = await _storage.read(key: "user");
   return jsonUser != null ? User.fromJson(json.decode(jsonUser)) : User();
 }
