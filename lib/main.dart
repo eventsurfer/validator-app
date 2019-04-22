@@ -26,7 +26,7 @@ class MyHomePage extends StatelessWidget {
     return CupertinoPageScaffold(
       child: Center(
         child: CupertinoButton.filled(
-          child: Text("Scan Barcode"),
+          child: Text("Scan QR Code"),
           onPressed: () async {
             try {
               List<String> ids = (await BarcodeScanner.scan()).split("\n");
@@ -34,7 +34,7 @@ class MyHomePage extends StatelessWidget {
               Ticket t = await validateTicket(await getUser(), ids[3], int.parse(ids[2]));
               Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => TicketInfoPage(t)));
             } catch (e) {
-              if (e is ValidationException) {
+              if (e is TicketValidationException) {
                 showCupertinoDialog(
                   context: context,
                   builder: (BuildContext context) => CupertinoAlertDialog(
@@ -54,8 +54,26 @@ class MyHomePage extends StatelessWidget {
                         ],
                       ),
                 );
+              } else if (e is FormatException) {
               } else {
-                print(e.toString());
+                showCupertinoDialog(
+                  context: context,
+                  builder: (BuildContext context) => CupertinoAlertDialog(
+                        title: Text("Invalider Barcode"),
+                        actions: [
+                          CupertinoDialogAction(
+                            isDefaultAction: true,
+                            child: Text(
+                              "Close",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop("Cancel");
+                            },
+                          )
+                        ],
+                      ),
+                );
               }
             }
           },
@@ -82,11 +100,17 @@ class TicketInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: ListView(
+          physics: ClampingScrollPhysics(),
           children: <Widget>[
-            Text(this._ticket.valid ? "Ticket valid" : "Ticket invalid"),
-            Text("Gekauft am: ${DateFormat.yMd(Intl.systemLocale).add_Hm().format(this._ticket.createdAt)}"),
+            Center(
+              child: Text(this._ticket.valid ? "Ticket valid" : "Ticket invalid"),
+            ),
+            Center(
+              child: Text("Gekauft am: ${DateFormat.yMd(Intl.systemLocale).add_Hm().format(this._ticket.createdAt)}"),
+            ),
             this._ticket.valid
                 ? Icon(
                     CupertinoIcons.check_mark_circled_solid,
@@ -133,44 +157,127 @@ class _SettingsState extends State<Settings> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
         child: ListView(
+          physics: ClampingScrollPhysics(),
           children: <Widget>[
-            CupertinoTextField(
-              controller: this._apiController,
-              clearButtonMode: OverlayVisibilityMode.editing,
-              placeholder: "API Key",
-              autocorrect: false,
-              maxLines: 1,
-              suffix: CupertinoButton(
-                child: Icon(CupertinoIcons.photo_camera),
-                onPressed: () {
-                  setState(() async {
-                    this._apiController.text = await BarcodeScanner.scan();
-                  });
-                },
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: CupertinoTextField(
+                controller: this._apiController,
+                clearButtonMode: OverlayVisibilityMode.editing,
+                placeholder: "API Key",
+                autocorrect: false,
+                maxLines: null,
+                prefix: GestureDetector(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Icon(
+                      CupertinoIcons.photo_camera_solid,
+                      size: 18.0,
+                      color: Color(0xFFC2C2C2),
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() async {
+                      try {
+                        this._apiController.text = await BarcodeScanner.scan();
+                      } catch (e) {}
+                    });
+                  },
+                ),
               ),
             ),
-            CupertinoTextField(
-              controller: _userController,
-              clearButtonMode: OverlayVisibilityMode.editing,
-              placeholder: "Username",
-              autocorrect: false,
-              maxLines: 1,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: CupertinoTextField(
+                controller: _userController,
+                clearButtonMode: OverlayVisibilityMode.editing,
+                placeholder: "Username",
+                autocorrect: false,
+              ),
             ),
-            CupertinoTextField(
-              controller: _pswController,
-              clearButtonMode: OverlayVisibilityMode.editing,
-              placeholder: "Password",
-              obscureText: true,
-              maxLines: 1,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: CupertinoTextField(
+                controller: _pswController,
+                clearButtonMode: OverlayVisibilityMode.editing,
+                placeholder: "Password",
+                obscureText: true,
+              ),
             ),
-            CupertinoButton.filled(
-              child: Text("Login"),
-              onPressed: () async {
-                saveApiKey(this._apiController.text);
-                saveUser(await signUserIn(this._userController.text, this._pswController.text));
-                Navigator.pop(context);
-                // TODO user feedback
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: CupertinoButton.filled(
+                child: Text("Login"),
+                onPressed: () async {
+                  saveApiKey(this._apiController.text);
+                  try {
+                    User u = await signUserIn(this._userController.text, this._pswController.text);
+                    saveUser(u);
+                    Navigator.pop(context);
+
+                    showCupertinoDialog(
+                      context: context,
+                      builder: (BuildContext context) => CupertinoAlertDialog(
+                            title: Text("Login erfolgreich"),
+                            content: Text("Sie haben sich erfolgreich als ${u.name} angemeldet"),
+                            actions: [
+                              CupertinoDialogAction(
+                                isDefaultAction: true,
+                                child: Text(
+                                  "Close",
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context, rootNavigator: true).pop("Cancel");
+                                },
+                              )
+                            ],
+                          ),
+                    );
+                  } catch (e) {
+                    if (e is UserValidationException) {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (BuildContext context) => CupertinoAlertDialog(
+                              title: Text("Error ${e.code}"),
+                              content: Text(e.message),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: Text(
+                                    "Close",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true).pop("Cancel");
+                                  },
+                                )
+                              ],
+                            ),
+                      );
+                    } else {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (BuildContext context) => CupertinoAlertDialog(
+                              title: Text("Error"),
+                              content: Text(e.toString()),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: Text(
+                                    "Close",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true).pop("Cancel");
+                                  },
+                                )
+                              ],
+                            ),
+                      );
+                    }
+                  }
+                },
+              ),
             )
           ],
         ),
