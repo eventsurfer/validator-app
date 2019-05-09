@@ -40,7 +40,7 @@ class User {
   String email;
   DateTime createdAt;
   DateTime updatedAt;
-  int role;
+  String role;
 
   User();
 
@@ -54,7 +54,7 @@ class User {
       ..email = json["email"] as String
       ..createdAt = DateTime.parse(json["created_at"])
       ..updatedAt = DateTime.parse(json["updated_at"])
-      ..role = json["role"] as int;
+      ..role = json["role"] as String;
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{

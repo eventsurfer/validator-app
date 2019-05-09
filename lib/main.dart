@@ -29,9 +29,14 @@ class MyHomePage extends StatelessWidget {
           child: Text("Scan QR Code"),
           onPressed: () async {
             try {
-              List<String> ids = (await BarcodeScanner.scan()).split("\n");
+              String barcode = await BarcodeScanner.scan();
 
-              Ticket t = await validateTicket(await getUser(), ids[3], int.parse(ids[2]));
+              List<String> ids = barcode.split("D");
+
+              int ticketID = int.parse(ids.removeLast());
+              String validateID = ids.join();
+
+              Ticket t = await validateTicket(await getUser(), validateID, ticketID);
               Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => TicketInfoPage(t)));
             } catch (e) {
               if (e is TicketValidationException) {
@@ -54,7 +59,6 @@ class MyHomePage extends StatelessWidget {
                         ],
                       ),
                 );
-              } else if (e is FormatException) {
               } else {
                 showCupertinoDialog(
                   context: context,

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:validator_app/data.dart';
 import 'package:validator_app/settings.dart';
 
-const String host = "http://5.230.147.42/";
+const String host = "http://eventsurfer.online/";
 
 Future<Ticket> validateTicket(User user, String validateId, int ticketId) async {
   final http.Response response = await http.post(
