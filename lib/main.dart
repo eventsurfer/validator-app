@@ -36,7 +36,7 @@ class MyHomePage extends StatelessWidget {
               int ticketID = int.parse(ids.removeLast());
               String validateID = ids.join();
 
-              Ticket t = await validateTicket(await getUser(), validateID, ticketID);
+              Ticket t = await validateTicket(await getUser(), barcode, ticketID);
               Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => TicketInfoPage(t)));
             } catch (e) {
               if (e is TicketValidationException) {
