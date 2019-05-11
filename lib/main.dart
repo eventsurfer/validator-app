@@ -1,6 +1,7 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:validator_app/api.dart';
 import 'package:validator_app/data.dart';
@@ -45,6 +46,25 @@ class MyHomePage extends StatelessWidget {
                   builder: (BuildContext context) => CupertinoAlertDialog(
                         title: Text("Error ${e.code}"),
                         content: Text(e.message),
+                        actions: [
+                          CupertinoDialogAction(
+                            isDefaultAction: true,
+                            child: Text(
+                              "Close",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pop("Cancel");
+                            },
+                          )
+                        ],
+                      ),
+                );
+              } else if (e is PlatformException && e.message.contains("error:1e000065:Cipher")) {
+                showCupertinoDialog(
+                  context: context,
+                  builder: (BuildContext context) => CupertinoAlertDialog(
+                        title: Text("Kein angemeldeter Benutzer"),
                         actions: [
                           CupertinoDialogAction(
                             isDefaultAction: true,
@@ -195,7 +215,8 @@ class _SettingsState extends State<Settings> {
               child: CupertinoTextField(
                 controller: _userController,
                 clearButtonMode: OverlayVisibilityMode.editing,
-                placeholder: "Username",
+                keyboardType: TextInputType.emailAddress,
+                placeholder: "E-Mail",
                 autocorrect: false,
               ),
             ),
