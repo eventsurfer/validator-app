@@ -1,6 +1,5 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:validator_app/api.dart';
@@ -51,7 +50,7 @@ class MyHomePage extends StatelessWidget {
                             isDefaultAction: true,
                             child: Text(
                               "Close",
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: CupertinoColors.destructiveRed),
                             ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).pop("Cancel");
@@ -70,7 +69,7 @@ class MyHomePage extends StatelessWidget {
                             isDefaultAction: true,
                             child: Text(
                               "Close",
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: CupertinoColors.destructiveRed),
                             ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).pop("Cancel");
@@ -89,7 +88,7 @@ class MyHomePage extends StatelessWidget {
                             isDefaultAction: true,
                             child: Text(
                               "Close",
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: CupertinoColors.destructiveRed),
                             ),
                             onPressed: () {
                               Navigator.of(context, rootNavigator: true).pop("Cancel");
@@ -138,11 +137,11 @@ class TicketInfoPage extends StatelessWidget {
             this._ticket.valid
                 ? Icon(
                     CupertinoIcons.check_mark_circled_solid,
-                    color: Colors.green,
+                    color: CupertinoColors.activeGreen,
                   )
                 : Icon(
                     CupertinoIcons.clear_thick,
-                    color: Colors.red,
+                    color: CupertinoColors.destructiveRed,
                   )
           ],
         ),
@@ -270,7 +269,7 @@ class _SettingsState extends State<Settings> {
                                   isDefaultAction: true,
                                   child: Text(
                                     "Close",
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: CupertinoColors.destructiveRed),
                                   ),
                                   onPressed: () {
                                     Navigator.of(context, rootNavigator: true).pop("Cancel");
@@ -290,7 +289,7 @@ class _SettingsState extends State<Settings> {
                                   isDefaultAction: true,
                                   child: Text(
                                     "Close",
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: CupertinoColors.destructiveRed),
                                   ),
                                   onPressed: () {
                                     Navigator.of(context, rootNavigator: true).pop("Cancel");
