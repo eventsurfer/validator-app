@@ -9,7 +9,6 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-            android:name="io.flutter.app.FlutterApplication"
             android:label="Eventsurfer Validator"
             android:icon="@mipmap/ic_launcher">
         <activity
@@ -24,8 +23,12 @@
                  there is no splash screen (such as the default splash screen
                  defined in @style/LaunchTheme). -->
             <meta-data
-                    android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                    android:value="true"/>
+                    android:name="io.flutter.embedding.android.SplashScreenDrawable"
+                    android:resource="@drawable/launch_background" />
+            <meta-data
+                    android:name="io.flutter.embedding.android.NormalTheme"
+                    android:resource="@style/LaunchTheme"
+            />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -33,5 +36,9 @@
         </activity>
 
         <activity android:name="com.apptreesoftware.barcodescan.BarcodeScannerActivity"/>
+
+        <meta-data
+                android:name="flutterEmbedding"
+                android:value="2" />
     </application>
 </manifest>
