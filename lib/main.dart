@@ -28,76 +28,47 @@ class MyHomePage extends StatelessWidget {
         child: CupertinoButton.filled(
           child: Text("Scan QR Code"),
           onPressed: () async {
-            try {
-              String barcode = await BarcodeScanner.scan();
+            var result = await BarcodeScanner.scan();
+            if (result.type == ResultType.Barcode) {
+              String barcode = result.rawContent;
 
               List<String> ids = barcode.split("D");
 
               int ticketID = int.parse(ids.removeLast());
               String validateID = ids.join();
 
-              Ticket t = await validateTicket(await getUser(), barcode, ticketID);
-              Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => TicketInfoPage(t)));
-            } catch (e) {
-              if (e is TicketValidationException) {
-                showCupertinoDialog(
-                  context: context,
-                  builder: (BuildContext context) => CupertinoAlertDialog(
-                        title: Text("Error ${e.code}"),
-                        content: Text(e.message),
-                        actions: [
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            child: Text(
-                              "Close",
-                              style: TextStyle(color: CupertinoColors.destructiveRed),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pop("Cancel");
-                            },
-                          )
-                        ],
+              Ticket t = await validateTicket(
+                await getUser(),
+                barcode,
+                ticketID,
+              );
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (BuildContext context) => TicketInfoPage(t),
+                ),
+              );
+            } else if (result.type == ResultType.Error) {
+              showCupertinoDialog(
+                context: context,
+                builder: (BuildContext context) => CupertinoAlertDialog(
+                  title: Text("Error"),
+                  content: Text(result.rawContent),
+                  actions: [
+                    CupertinoDialogAction(
+                      isDefaultAction: true,
+                      child: Text(
+                        "Close",
+                        style: TextStyle(color: CupertinoColors.destructiveRed),
                       ),
-                );
-              } else if (e is PlatformException && e.message.contains("error:1e000065:Cipher")) {
-                showCupertinoDialog(
-                  context: context,
-                  builder: (BuildContext context) => CupertinoAlertDialog(
-                        title: Text("Kein angemeldeter Benutzer"),
-                        actions: [
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            child: Text(
-                              "Close",
-                              style: TextStyle(color: CupertinoColors.destructiveRed),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pop("Cancel");
-                            },
-                          )
-                        ],
-                      ),
-                );
-              } else {
-                showCupertinoDialog(
-                  context: context,
-                  builder: (BuildContext context) => CupertinoAlertDialog(
-                        title: Text("Invalider Barcode"),
-                        actions: [
-                          CupertinoDialogAction(
-                            isDefaultAction: true,
-                            child: Text(
-                              "Close",
-                              style: TextStyle(color: CupertinoColors.destructiveRed),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pop("Cancel");
-                            },
-                          )
-                        ],
-                      ),
-                );
-              }
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop("Cancel");
+                      },
+                    )
+                  ],
+                ),
+              );
             }
           },
         ),
@@ -199,12 +170,13 @@ class _SettingsState extends State<Settings> {
                       color: Color(0xFFC2C2C2),
                     ),
                   ),
-                  onTap: () {
-                    setState(() async {
-                      try {
-                        this._apiController.text = await BarcodeScanner.scan();
-                      } catch (e) {}
-                    });
+                  onTap: () async {
+                    var result = await BarcodeScanner.scan();
+                    if (result.type == ResultType.Barcode) {
+                      setState(() {
+                        this._apiController.text = result.rawContent;
+                      });
+                    }
                   },
                 ),
               ),
